@@ -43,3 +43,20 @@ Projetweb/
 │   └── login.js     
 │   └── bgpic.jpg                        
 └── README.md
+
+ ## APIs et bibliothèques utilisées
+   Faker.js :
+        Génère des données réalistes (noms, e-mails, produits, etc.).
+
+
+   ## Développement
+    --Ce projet est conçu en respectant les consignes suivantes :
+
+    -Aucun framework moderne (React, Angular, etc.).
+    -Utilisation de VanillaJS pour manipuler le DOM et gérer les interactions.
+    -Design moderne grâce à CSS Grid et Flexbox.
+
+   ## Auteur
+        --Mehdi Amine Bazguioui
+        --Email : Mehdiamine.bazguioui@emsi-edu.ma
+        --Github : M-A-B-04
