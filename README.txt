@@ -38,8 +38,8 @@ Projetweb/
 │   └── adminpage.html     
 │   └── adminpage.js     
 ├── loginpage/    
-    ├── login.css       
+│   ├── login.css       
 │   └── login.html     
 │   └── login.js     
-├── bgpic.jpg                   
+│   └── bgpic.jpg                        
 └── README.md
