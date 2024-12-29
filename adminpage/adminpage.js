@@ -20,7 +20,7 @@ function generateFakeData() {
   }
 
   data.clients = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(), // Compatible avec anciennes versions
+    ID: faker.random.uuid(),
     Nom: faker.name.findName(),
     Email: faker.internet.email(),
     Téléphone: faker.phone.phoneNumber(),
@@ -163,11 +163,9 @@ function init() {
   // Charger la première entité par défaut
   updateTable("clients");
 
-  // Ajouter le bouton "Créer"
-  const createBtn = document.createElement("button");
-  createBtn.textContent = "Ajouter une nouvelle entrée";
+  // Ajouter l'événement au bouton "Créer"
+  const createBtn = document.getElementById("add-entry-btn");
   createBtn.onclick = () => createRow("clients");
-  document.body.insertBefore(createBtn, document.body.firstChild);
 }
 
 document.addEventListener("DOMContentLoaded", init);

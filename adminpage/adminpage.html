@@ -7,27 +7,35 @@
   <link rel="stylesheet" href="adminpage.css">
 </head>
 <body>
-  <header>
-    <nav class="navbar">
-      <a href="#" class="nav-item" data-entity="clients">Clients</a>
-      <a href="#" class="nav-item" data-entity="commandes">Commandes</a>
-      <a href="#" class="nav-item" data-entity="produits">Produits</a>
-      <a href="#" class="nav-item" data-entity="factures">Factures</a>
-      <a href="#" class="nav-item" data-entity="utilisateurs">Utilisateurs</a>
-    </nav>
-  </header>
+  <div class="layout">
+    <!-- Barre de navigation verticale -->
+    <aside class="sidebar">
+      <h2><i>Admin Panel</i></h2>
+      <nav class="nav">
+        <a href="#" class="nav-item" data-entity="clients">Clients</a>
+        <a href="#" class="nav-item" data-entity="commandes">Commandes</a>
+        <a href="#" class="nav-item" data-entity="produits">Produits</a>
+        <a href="#" class="nav-item" data-entity="factures">Factures</a>
+        <a href="#" class="nav-item" data-entity="utilisateurs">Utilisateurs</a>
+      </nav>
+    </aside>
 
-  <main>
-    <h1 id="entity-title">Clients</h1>
-    <div class="table-container">
-      <table id="entity-table">
-        <thead>
-          <tr id="table-head"></tr>
-        </thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
-  </main>
+    <!-- Contenu principal -->
+    <main class="content">
+      <header>
+        <h1 id="entity-title">Clients</h1>
+        <button id="add-entry-btn">Ajouter une nouvelle entrée</button>
+      </header>
+      <div class="table-container">
+        <table id="entity-table">
+          <thead>
+            <tr id="table-head"></tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js"></script>
   <script src="adminpage.js"></script>
 </body>
