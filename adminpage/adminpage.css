@@ -84,6 +84,13 @@
     background-color: #218838;
   }
   
+  #search-bar {
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
   /* Tableau */
   .table-container {
     background: white;
@@ -109,5 +116,22 @@
   
   tbody tr:hover {
     background-color: #f9f9f9;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 200px;
+    }
+  
+    #search-bar {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
   

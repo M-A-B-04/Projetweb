@@ -1,7 +1,4 @@
-// Déclare et initialise `data` comme un objet vide
 const data = {};
-
-// Déclare les colonnes pour chaque entité
 const entities = {
   clients: ["ID", "Nom", "Email", "Téléphone"],
   commandes: ["ID", "Produit", "Quantité", "Prix", "Statut"],
@@ -10,64 +7,42 @@ const entities = {
   utilisateurs: ["ID", "Nom d'utilisateur", "Rôle", "Email", "Dernière connexion"],
 };
 
-// Générer des données fictives avec Faker.js
-function generateFakeData() {
-  const faker = window.faker; // Assurez-vous que Faker.js est chargé avant ce script
-
-  if (!faker || !faker.random) {
-    console.error("Faker.js n'est pas chargé correctement !");
-    return;
-  }
-
-  data.clients = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    Nom: faker.name.findName(),
-    Email: faker.internet.email(),
-    Téléphone: faker.phone.phoneNumber(),
-  }));
-
-  data.commandes = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    Produit: faker.commerce.productName(),
-    Quantité: faker.random.number({ min: 1, max: 10 }),
-    Prix: faker.commerce.price(),
-    Statut: faker.random.arrayElement(["En attente", "Livrée", "Annulée"]),
-  }));
-
-  data.produits = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    Nom: faker.commerce.productName(),
-    Catégorie: faker.commerce.department(),
-    Prix: faker.commerce.price(),
-    Stock: faker.random.number({ min: 0, max: 100 }),
-  }));
-
-  data.factures = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    Client: faker.name.findName(),
-    Montant: faker.commerce.price(),
-    Date: faker.date.past().toLocaleDateString(),
-    Statut: faker.random.arrayElement(["Payée", "En attente", "Annulée"]),
-  }));
-
-  data.utilisateurs = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    "Nom d'utilisateur": faker.internet.userName(),
-    Rôle: faker.random.arrayElement(["Admin", "Utilisateur", "Modérateur"]),
-    Email: faker.internet.email(),
-    "Dernière connexion": faker.date.recent().toLocaleString(),
-  }));
+// Persistance des données avec LocalStorage
+function saveData(entity) {
+  localStorage.setItem(entity, JSON.stringify(data[entity]));
 }
 
-// Met à jour le tableau en fonction de l'entité sélectionnée
+function loadData(entity) {
+  const storedData = localStorage.getItem(entity);
+  return storedData ? JSON.parse(storedData) : [];
+}
+
+// Générer des données fictives avec Faker.js
+function generateFakeData() {
+  Object.keys(entities).forEach(entity => {
+    data[entity] = loadData(entity);
+    if (data[entity].length === 0) {
+      data[entity] = Array.from({ length: 5 }, (_, index) => {
+        return entities[entity].reduce((acc, field) => {
+          acc[field] = `Donnée ${index + 1} - ${field}`;
+          return acc;
+        }, {});
+      });
+      saveData(entity);
+    }
+  });
+}
+
+// Met à jour le tableau
 function updateTable(entity) {
   const tableHead = document.getElementById("table-head");
   const tableBody = document.getElementById("table-body");
   const title = document.getElementById("entity-title");
+  const searchBar = document.getElementById("search-bar");
 
   title.textContent = entity.charAt(0).toUpperCase() + entity.slice(1);
+  searchBar.placeholder = `Rechercher dans ${entity}...`;
 
-  // Effacer le contenu précédent
   tableHead.innerHTML = "";
   tableBody.innerHTML = "";
 
@@ -92,7 +67,6 @@ function updateTable(entity) {
       tr.appendChild(td);
     });
 
-    // Ajouter les boutons d'actions (Éditer, Supprimer)
     const actionsTd = document.createElement("td");
     const editBtn = document.createElement("button");
     const deleteBtn = document.createElement("button");
@@ -120,9 +94,9 @@ function createRow(entity) {
       newRow[field] = value;
     }
   });
-
   if (Object.keys(newRow).length === entities[entity].length) {
     data[entity].push(newRow);
+    saveData(entity);
     updateTable(entity);
   }
 }
@@ -136,6 +110,7 @@ function editRow(entity, index) {
       row[key] = newValue;
     }
   });
+  saveData(entity);
   updateTable(entity);
 }
 
@@ -143,11 +118,20 @@ function editRow(entity, index) {
 function deleteRow(entity, index) {
   if (confirm("Êtes-vous sûr de vouloir supprimer cette entrée ?")) {
     data[entity].splice(index, 1);
+    saveData(entity);
     updateTable(entity);
   }
 }
 
-// Initialiser l'application
+// Recherche dynamique
+function filterData(entity, query) {
+  const filtered = data[entity].filter(row =>
+    Object.values(row).some(value => value.toLowerCase().includes(query.toLowerCase()))
+  );
+  return filtered;
+}
+
+// Initialisation
 function init() {
   generateFakeData();
 
@@ -160,12 +144,22 @@ function init() {
     });
   });
 
+  // Recherche
+  document.getElementById("search-bar").addEventListener("input", (e) => {
+    const entity = document.getElementById("entity-title").textContent.toLowerCase();
+    const filteredData = filterData(entity, e.target.value);
+    data[entity] = filteredData.length > 0 ? filteredData : loadData(entity);
+    updateTable(entity);
+  });
+
+  // Bouton "Créer"
+  document.getElementById("add-entry-btn").onclick = () => {
+    const entity = document.getElementById("entity-title").textContent.toLowerCase();
+    createRow(entity);
+  };
+
   // Charger la première entité par défaut
   updateTable("clients");
-
-  // Ajouter l'événement au bouton "Créer"
-  const createBtn = document.getElementById("add-entry-btn");
-  createBtn.onclick = () => createRow("clients");
 }
 
 document.addEventListener("DOMContentLoaded", init);
