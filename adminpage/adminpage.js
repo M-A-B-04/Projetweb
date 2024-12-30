@@ -1,3 +1,4 @@
+// Initialisation des données
 const data = {};
 const entities = {
   clients: ["ID", "Nom", "Email", "Téléphone"],
@@ -7,34 +8,76 @@ const entities = {
   utilisateurs: ["ID", "Nom d'utilisateur", "Rôle", "Email", "Dernière connexion"],
 };
 
-// Persistance des données avec LocalStorage
+// Fonction pour sauvegarder les données dans LocalStorage
 function saveData(entity) {
   localStorage.setItem(entity, JSON.stringify(data[entity]));
 }
 
+// Fonction pour charger les données depuis LocalStorage
 function loadData(entity) {
   const storedData = localStorage.getItem(entity);
   return storedData ? JSON.parse(storedData) : [];
 }
 
-// Générer des données fictives avec Faker.js
+// Fonction pour générer des données réalistes
 function generateFakeData() {
-  Object.keys(entities).forEach(entity => {
-    data[entity] = loadData(entity);
-    if (data[entity].length === 0) {
-      data[entity] = Array.from({ length: 5 }, (_, index) => {
-        return entities[entity].reduce((acc, field) => {
-          acc[field] = `Donnée ${index + 1} - ${field}`;
-          return acc;
-        }, {});
-      });
-      saveData(entity);
+    if (!window.faker || !faker.datatype) {
+      console.error("Faker.js n'est pas chargé correctement !");
+      alert("Erreur : Faker.js n'est pas chargé correctement !");
+      return;
     }
-  });
-}
+  
+    // Générer des données réalistes pour les entités
+    data.clients = Array.from({ length: 10 }, () => ({
+      ID: faker.datatype.uuid(),
+      Nom: faker.name.findName(),
+      Email: faker.internet.email(),
+      Téléphone: faker.phone.phoneNumberFormat(),
+    }));
+  
+    data.commandes = Array.from({ length: 10 }, () => ({
+      ID: faker.datatype.uuid(),
+      Produit: faker.commerce.productName(),
+      Quantité: faker.datatype.number({ min: 1, max: 10 }),
+      Prix: faker.commerce.price(10, 100, 2, "€"),
+      Statut: faker.helpers.randomize(["En attente", "Livrée", "Annulée"]),
+    }));
+  
+    data.produits = Array.from({ length: 10 }, () => ({
+      ID: faker.datatype.uuid(),
+      Nom: faker.commerce.productName(),
+      Catégorie: faker.commerce.department(),
+      Prix: faker.commerce.price(5, 500, 2, "€"),
+      Stock: faker.datatype.number({ min: 0, max: 100 }),
+    }));
+  
+    data.factures = Array.from({ length: 10 }, () => ({
+      ID: faker.datatype.uuid(),
+      Client: faker.name.findName(),
+      Montant: faker.commerce.price(50, 1000, 2, "€"),
+      Date: faker.date.past(1).toLocaleDateString(),
+      Statut: faker.helpers.randomize(["Payée", "En attente", "Annulée"]),
+    }));
+  
+    data.utilisateurs = Array.from({ length: 10 }, () => ({
+      ID: faker.datatype.uuid(),
+      "Nom d'utilisateur": faker.internet.userName(),
+      Rôle: faker.helpers.randomize(["Admin", "Utilisateur", "Modérateur"]),
+      Email: faker.internet.email(),
+      "Dernière connexion": faker.date.recent().toLocaleString(),
+    }));
+  
+    console.log("Données générées : ", data);
+  }
+  
 
-// Met à jour le tableau
+// Fonction pour mettre à jour le tableau
 function updateTable(entity) {
+  if (!data[entity] || data[entity].length === 0) {
+    console.error(`Les données pour l'entité "${entity}" sont introuvables ou vides.`);
+    return;
+  }
+
   const tableHead = document.getElementById("table-head");
   const tableBody = document.getElementById("table-body");
   const title = document.getElementById("entity-title");
@@ -123,7 +166,7 @@ function deleteRow(entity, index) {
   }
 }
 
-// Recherche dynamique
+// Fonction de recherche dynamique
 function filterData(entity, query) {
   const filtered = data[entity].filter(row =>
     Object.values(row).some(value => value.toLowerCase().includes(query.toLowerCase()))
@@ -144,7 +187,6 @@ function init() {
     });
   });
 
-  // Recherche
   document.getElementById("search-bar").addEventListener("input", (e) => {
     const entity = document.getElementById("entity-title").textContent.toLowerCase();
     const filteredData = filterData(entity, e.target.value);
@@ -152,13 +194,11 @@ function init() {
     updateTable(entity);
   });
 
-  // Bouton "Créer"
   document.getElementById("add-entry-btn").onclick = () => {
     const entity = document.getElementById("entity-title").textContent.toLowerCase();
     createRow(entity);
   };
 
-  // Charger la première entité par défaut
   updateTable("clients");
 }
 
