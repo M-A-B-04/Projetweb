@@ -19,57 +19,79 @@ function loadData(entity) {
   return storedData ? JSON.parse(storedData) : [];
 }
 
-// Fonction pour générer des données réalistes
 function generateFakeData() {
-    if (!window.faker || !faker.datatype) {
-      console.error("Faker.js n'est pas chargé correctement !");
-      alert("Erreur : Faker.js n'est pas chargé correctement !");
-      return;
-    }
-  
-    // Générer des données réalistes pour les entités
-    data.clients = Array.from({ length: 10 }, () => ({
-      ID: faker.datatype.uuid(),
-      Nom: faker.name.findName(),
-      Email: faker.internet.email(),
-      Téléphone: faker.phone.phoneNumberFormat(),
-    }));
-  
-    data.commandes = Array.from({ length: 10 }, () => ({
-      ID: faker.datatype.uuid(),
-      Produit: faker.commerce.productName(),
-      Quantité: faker.datatype.number({ min: 1, max: 10 }),
-      Prix: faker.commerce.price(10, 100, 2, "€"),
-      Statut: faker.helpers.randomize(["En attente", "Livrée", "Annulée"]),
-    }));
-  
-    data.produits = Array.from({ length: 10 }, () => ({
-      ID: faker.datatype.uuid(),
-      Nom: faker.commerce.productName(),
-      Catégorie: faker.commerce.department(),
-      Prix: faker.commerce.price(5, 500, 2, "€"),
-      Stock: faker.datatype.number({ min: 0, max: 100 }),
-    }));
-  
-    data.factures = Array.from({ length: 10 }, () => ({
-      ID: faker.datatype.uuid(),
-      Client: faker.name.findName(),
-      Montant: faker.commerce.price(50, 1000, 2, "€"),
-      Date: faker.date.past(1).toLocaleDateString(),
-      Statut: faker.helpers.randomize(["Payée", "En attente", "Annulée"]),
-    }));
-  
-    data.utilisateurs = Array.from({ length: 10 }, () => ({
-      ID: faker.datatype.uuid(),
-      "Nom d'utilisateur": faker.internet.userName(),
-      Rôle: faker.helpers.randomize(["Admin", "Utilisateur", "Modérateur"]),
-      Email: faker.internet.email(),
-      "Dernière connexion": faker.date.recent().toLocaleString(),
-    }));
-  
-    console.log("Données générées : ", data);
+  if (!window.faker || !faker.datatype) {
+    console.error("Faker.js n'est pas chargé correctement !");
+    alert("Erreur : Faker.js n'est pas chargé correctement !");
+    return; // Arrête l'exécution si Faker.js est manquant
   }
-  
+
+  // Génération des données si Faker.js est présent
+  Object.keys(entities).forEach(entity => {
+    data[entity] = loadData(entity);
+
+    if (!data[entity] || data[entity].length === 0) {
+      switch (entity) {
+        case "clients":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.datatype.uuid(),
+            Nom: faker.name.findName(),
+            Email: faker.internet.email(),
+            Téléphone: faker.phone.phoneNumber(),
+          }));
+          break;
+
+        case "commandes":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.datatype.uuid(),
+            Produit: faker.commerce.productName(),
+            Quantité: faker.datatype.number({ min: 1, max: 10 }),
+            Prix: faker.commerce.price(10, 100, 2, "€"),
+            Statut: faker.helpers.randomize(["En attente", "Livrée", "Annulée"]),
+          }));
+          break;
+
+        case "produits":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.datatype.uuid(),
+            Nom: faker.commerce.productName(),
+            Catégorie: faker.commerce.department(),
+            Prix: faker.commerce.price(5, 500, 2, "€"),
+            Stock: faker.datatype.number({ min: 0, max: 100 }),
+          }));
+          break;
+
+        case "factures":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.datatype.uuid(),
+            Client: faker.name.findName(),
+            Montant: faker.commerce.price(50, 1000, 2, "€"),
+            Date: faker.date.past(1).toLocaleDateString(),
+            Statut: faker.helpers.randomize(["Payée", "En attente", "Annulée"]),
+          }));
+          break;
+
+        case "utilisateurs":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.datatype.uuid(),
+            "Nom d'utilisateur": faker.internet.userName(),
+            Rôle: faker.helpers.randomize(["Admin", "Utilisateur", "Modérateur"]),
+            Email: faker.internet.email(),
+            "Dernière connexion": faker.date.recent().toLocaleString(),
+          }));
+          break;
+
+        default:
+          console.error(`Entité inconnue : ${entity}`);
+          break;
+      }
+      saveData(entity);
+    }
+  });
+
+  console.log("Données générées : ", data);
+}
+
 
 // Fonction pour mettre à jour le tableau
 function updateTable(entity) {
@@ -168,10 +190,20 @@ function deleteRow(entity, index) {
 
 // Fonction de recherche dynamique
 function filterData(entity, query) {
+  if (!query.trim()) {
+    data[entity] = loadData(entity); // Recharger les données originales si la recherche est vide
+    updateTable(entity);
+    return;
+  }
+
   const filtered = data[entity].filter(row =>
-    Object.values(row).some(value => value.toLowerCase().includes(query.toLowerCase()))
+    Object.values(row).some(value =>
+      value.toLowerCase().includes(query.toLowerCase())
+    )
   );
-  return filtered;
+
+  data[entity] = filtered;
+  updateTable(entity);
 }
 
 // Initialisation
@@ -189,9 +221,7 @@ function init() {
 
   document.getElementById("search-bar").addEventListener("input", (e) => {
     const entity = document.getElementById("entity-title").textContent.toLowerCase();
-    const filteredData = filterData(entity, e.target.value);
-    data[entity] = filteredData.length > 0 ? filteredData : loadData(entity);
-    updateTable(entity);
+    filterData(entity, e.target.value);
   });
 
   document.getElementById("add-entry-btn").onclick = () => {
