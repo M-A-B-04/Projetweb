@@ -13,61 +13,85 @@ function saveData(entity) {
   localStorage.setItem(entity, JSON.stringify(data[entity]));
 }
 
+
+
 // Fonction pour charger les données depuis LocalStorage
 function loadData(entity) {
   const storedData = localStorage.getItem(entity);
   return storedData ? JSON.parse(storedData) : [];
 }
 
-// Générer des données fictives avec Faker.js
+// Générer des données fictives avec Faker.js 3.1.0
 function generateFakeData() {
-  const faker = window.faker; // Assurez-vous que Faker.js est chargé avant ce script
-
-  if (!faker || !faker.random) {
+  if (!window.faker) {
     console.error("Faker.js n'est pas chargé correctement !");
     return;
   }
 
-  data.clients = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    Nom: faker.name.findName(),
-    Email: faker.internet.email(),
-    Téléphone: faker.phone.phoneNumber(),
-  }));
+  Object.keys(entities).forEach(entity => {
+    data[entity] = loadData(entity);
 
-  data.commandes = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    Produit: faker.commerce.productName(),
-    Quantité: faker.random.number({ min: 1, max: 10 }),
-    Prix: faker.commerce.price(),
-    Statut: faker.random.arrayElement(["En attente", "Livrée", "Annulée"]),
-  }));
+    if (!data[entity] || data[entity].length === 0) {
+      switch (entity) {
+        case "clients":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.random.uuid(),
+            Nom: faker.name.findName(),
+            Email: faker.internet.email(),
+            Téléphone: faker.phone.phoneNumber(),
+          }));
+          break;
 
-  data.produits = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    Nom: faker.commerce.productName(),
-    Catégorie: faker.commerce.department(),
-    Prix: faker.commerce.price(),
-    Stock: faker.random.number({ min: 0, max: 100 }),
-  }));
+        case "commandes":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.random.uuid(),
+            Produit: faker.commerce.productName(),
+            Quantité: faker.random.number({ min: 1, max: 10 }),
+            Prix: faker.commerce.price(),
+            Statut: faker.random.arrayElement(["En attente", "Livrée", "Annulée"]),
+          }));
+          break;
 
-  data.factures = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    Client: faker.name.findName(),
-    Montant: faker.commerce.price(),
-    Date: faker.date.past().toLocaleDateString(),
-    Statut: faker.random.arrayElement(["Payée", "En attente", "Annulée"]),
-  }));
+        case "produits":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.random.uuid(),
+            Nom: faker.commerce.productName(),
+            Catégorie: faker.commerce.department(),
+            Prix: faker.commerce.price(),
+            Stock: faker.random.number({ min: 0, max: 100 }),
+          }));
+          break;
 
-  data.utilisateurs = Array.from({ length: 5 }, () => ({
-    ID: faker.random.uuid(),
-    "Nom d'utilisateur": faker.internet.userName(),
-    Rôle: faker.random.arrayElement(["Admin", "Utilisateur", "Modérateur"]),
-    Email: faker.internet.email(),
-    "Dernière connexion": faker.date.recent().toLocaleString(),
-  }));
+        case "factures":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.random.uuid(),
+            Client: faker.name.findName(),
+            Montant: faker.commerce.price(),
+            Date: faker.date.past().toLocaleDateString(),
+            Statut: faker.random.arrayElement(["Payée", "En attente", "Annulée"]),
+          }));
+          break;
+
+        case "utilisateurs":
+          data[entity] = Array.from({ length: 10 }, () => ({
+            ID: faker.random.uuid(),
+            "Nom d'utilisateur": faker.internet.userName(),
+            Rôle: faker.random.arrayElement(["Admin", "Utilisateur", "Modérateur"]),
+            Email: faker.internet.email(),
+            "Dernière connexion": faker.date.recent().toLocaleString(),
+          }));
+          break;
+
+        default:
+          console.error(`Entité inconnue : ${entity}`);
+          break;
+      }
+      saveData(entity);
+    }
+  });
+
+  console.log("Données générées :", data);
 }
-
 
 // Fonction pour mettre à jour le tableau
 function updateTable(entity) {
@@ -142,28 +166,6 @@ function createRow(entity) {
   }
 }
 
-// Éditer une ligne
-function editRow(entity, index) {
-  const row = data[entity][index];
-  Object.keys(row).forEach(key => {
-    const newValue = prompt(`Modifier ${key} (actuel: ${row[key]}):`);
-    if (newValue) {
-      row[key] = newValue;
-    }
-  });
-  saveData(entity);
-  updateTable(entity);
-}
-
-// Supprimer une ligne
-function deleteRow(entity, index) {
-  if (confirm("Êtes-vous sûr de vouloir supprimer cette entrée ?")) {
-    data[entity].splice(index, 1);
-    saveData(entity);
-    updateTable(entity);
-  }
-}
-
 // Fonction de recherche dynamique
 function filterData(entity, query) {
   if (!query.trim()) {
@@ -172,7 +174,7 @@ function filterData(entity, query) {
     return;
   }
 
-  const filtered = data[entity].filter(row =>
+  const filtered = loadData(entity).filter(row =>
     Object.values(row).some(value =>
       value.toLowerCase().includes(query.toLowerCase())
     )
