@@ -19,77 +19,53 @@ function loadData(entity) {
   return storedData ? JSON.parse(storedData) : [];
 }
 
+// Générer des données fictives avec Faker.js
 function generateFakeData() {
-  if (!window.faker || !faker.datatype) {
+  const faker = window.faker; // Assurez-vous que Faker.js est chargé avant ce script
+
+  if (!faker || !faker.random) {
     console.error("Faker.js n'est pas chargé correctement !");
-    alert("Erreur : Faker.js n'est pas chargé correctement !");
-    return; // Arrête l'exécution si Faker.js est manquant
+    return;
   }
 
-  // Génération des données si Faker.js est présent
-  Object.keys(entities).forEach(entity => {
-    data[entity] = loadData(entity);
+  data.clients = Array.from({ length: 5 }, () => ({
+    ID: faker.random.uuid(),
+    Nom: faker.name.findName(),
+    Email: faker.internet.email(),
+    Téléphone: faker.phone.phoneNumber(),
+  }));
 
-    if (!data[entity] || data[entity].length === 0) {
-      switch (entity) {
-        case "clients":
-          data[entity] = Array.from({ length: 10 }, () => ({
-            ID: faker.datatype.uuid(),
-            Nom: faker.name.findName(),
-            Email: faker.internet.email(),
-            Téléphone: faker.phone.phoneNumber(),
-          }));
-          break;
+  data.commandes = Array.from({ length: 5 }, () => ({
+    ID: faker.random.uuid(),
+    Produit: faker.commerce.productName(),
+    Quantité: faker.random.number({ min: 1, max: 10 }),
+    Prix: faker.commerce.price(),
+    Statut: faker.random.arrayElement(["En attente", "Livrée", "Annulée"]),
+  }));
 
-        case "commandes":
-          data[entity] = Array.from({ length: 10 }, () => ({
-            ID: faker.datatype.uuid(),
-            Produit: faker.commerce.productName(),
-            Quantité: faker.datatype.number({ min: 1, max: 10 }),
-            Prix: faker.commerce.price(10, 100, 2, "€"),
-            Statut: faker.helpers.randomize(["En attente", "Livrée", "Annulée"]),
-          }));
-          break;
+  data.produits = Array.from({ length: 5 }, () => ({
+    ID: faker.random.uuid(),
+    Nom: faker.commerce.productName(),
+    Catégorie: faker.commerce.department(),
+    Prix: faker.commerce.price(),
+    Stock: faker.random.number({ min: 0, max: 100 }),
+  }));
 
-        case "produits":
-          data[entity] = Array.from({ length: 10 }, () => ({
-            ID: faker.datatype.uuid(),
-            Nom: faker.commerce.productName(),
-            Catégorie: faker.commerce.department(),
-            Prix: faker.commerce.price(5, 500, 2, "€"),
-            Stock: faker.datatype.number({ min: 0, max: 100 }),
-          }));
-          break;
+  data.factures = Array.from({ length: 5 }, () => ({
+    ID: faker.random.uuid(),
+    Client: faker.name.findName(),
+    Montant: faker.commerce.price(),
+    Date: faker.date.past().toLocaleDateString(),
+    Statut: faker.random.arrayElement(["Payée", "En attente", "Annulée"]),
+  }));
 
-        case "factures":
-          data[entity] = Array.from({ length: 10 }, () => ({
-            ID: faker.datatype.uuid(),
-            Client: faker.name.findName(),
-            Montant: faker.commerce.price(50, 1000, 2, "€"),
-            Date: faker.date.past(1).toLocaleDateString(),
-            Statut: faker.helpers.randomize(["Payée", "En attente", "Annulée"]),
-          }));
-          break;
-
-        case "utilisateurs":
-          data[entity] = Array.from({ length: 10 }, () => ({
-            ID: faker.datatype.uuid(),
-            "Nom d'utilisateur": faker.internet.userName(),
-            Rôle: faker.helpers.randomize(["Admin", "Utilisateur", "Modérateur"]),
-            Email: faker.internet.email(),
-            "Dernière connexion": faker.date.recent().toLocaleString(),
-          }));
-          break;
-
-        default:
-          console.error(`Entité inconnue : ${entity}`);
-          break;
-      }
-      saveData(entity);
-    }
-  });
-
-  console.log("Données générées : ", data);
+  data.utilisateurs = Array.from({ length: 5 }, () => ({
+    ID: faker.random.uuid(),
+    "Nom d'utilisateur": faker.internet.userName(),
+    Rôle: faker.random.arrayElement(["Admin", "Utilisateur", "Modérateur"]),
+    Email: faker.internet.email(),
+    "Dernière connexion": faker.date.recent().toLocaleString(),
+  }));
 }
 
 
