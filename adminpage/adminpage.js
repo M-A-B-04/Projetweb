@@ -13,15 +13,24 @@ function saveData(entity) {
   localStorage.setItem(entity, JSON.stringify(data[entity]));
 }
 
-
-
 // Fonction pour charger les données depuis LocalStorage
 function loadData(entity) {
   const storedData = localStorage.getItem(entity);
   return storedData ? JSON.parse(storedData) : [];
 }
 
-// Générer des données fictives avec Faker.js 3.1.0
+// Réinitialiser les données
+function resetData() {
+  Object.keys(entities).forEach(entity => {
+    localStorage.removeItem(entity); // Supprime les données sauvegardées
+    data[entity] = []; // Vide les données en mémoire
+  });
+  alert("Les données ont été réinitialisées !");
+  generateFakeData(); // Regénère des données fictives
+  updateTable("clients"); // Recharge la table par défaut
+}
+
+// Générer des données fictives avec Faker.js
 function generateFakeData() {
   if (!window.faker) {
     console.error("Faker.js n'est pas chargé correctement !");
@@ -93,7 +102,7 @@ function generateFakeData() {
   console.log("Données générées :", data);
 }
 
-// Fonction pour mettre à jour le tableau
+// Mettre à jour le tableau
 function updateTable(entity) {
   if (!data[entity] || data[entity].length === 0) {
     console.error(`Les données pour l'entité "${entity}" sont introuvables ou vides.`);
@@ -150,26 +159,32 @@ function updateTable(entity) {
   });
 }
 
-// Ajouter une nouvelle entrée
-function createRow(entity) {
-  const newRow = {};
-  entities[entity].forEach(field => {
-    const value = prompt(`Entrez la valeur pour ${field}:`);
-    if (value) {
-      newRow[field] = value;
+// Éditer une ligne
+function editRow(entity, index) {
+  const row = data[entity][index];
+  Object.keys(row).forEach(key => {
+    const newValue = prompt(`Modifier ${key} (actuel: ${row[key]}):`);
+    if (newValue) {
+      row[key] = newValue;
     }
   });
-  if (Object.keys(newRow).length === entities[entity].length) {
-    data[entity].push(newRow);
+  saveData(entity);
+  updateTable(entity);
+}
+
+// Supprimer une ligne
+function deleteRow(entity, index) {
+  if (confirm("Êtes-vous sûr de vouloir supprimer cette entrée ?")) {
+    data[entity].splice(index, 1);
     saveData(entity);
     updateTable(entity);
   }
 }
 
-// Fonction de recherche dynamique
+// Barre de recherche dynamique
 function filterData(entity, query) {
   if (!query.trim()) {
-    data[entity] = loadData(entity); // Recharger les données originales si la recherche est vide
+    data[entity] = loadData(entity);
     updateTable(entity);
     return;
   }
@@ -206,6 +221,8 @@ function init() {
     const entity = document.getElementById("entity-title").textContent.toLowerCase();
     createRow(entity);
   };
+
+  document.getElementById("reset-data-btn").onclick = resetData;
 
   updateTable("clients");
 }
