@@ -120,33 +120,40 @@ function updateTable(entity) {
   tableHead.innerHTML = "";
   tableBody.innerHTML = "";
 
-  // Ajouter les en-têtes
+  // Add headers with consistent width
   entities[entity].forEach(header => {
     const th = document.createElement("th");
     th.textContent = header;
+    th.style.width = header === "ID" ? "100px" : "auto"; // Fixed width for ID column
     tableHead.appendChild(th);
   });
 
-  // Ajouter les en-têtes d'actions
+  // Add actions header
   const actionsTh = document.createElement("th");
   actionsTh.textContent = "Actions";
+  actionsTh.style.width = "150px"; // Fixed width for actions column
   tableHead.appendChild(actionsTh);
 
-  // Ajouter les lignes de données
+  // Add data rows
   data[entity].forEach((row, index) => {
     const tr = document.createElement("tr");
+    
+    // Add data cells
     Object.values(row).forEach(value => {
       const td = document.createElement("td");
       td.textContent = value;
       tr.appendChild(td);
     });
 
+    // Add action buttons
     const actionsTd = document.createElement("td");
+    actionsTd.style.width = "150px"; // Match header width
+    
     const editBtn = document.createElement("button");
     const deleteBtn = document.createElement("button");
 
-    editBtn.textContent = "Éditer";
-    deleteBtn.textContent = "Supprimer";
+    editBtn.innerHTML = '<i class="fas fa-edit"></i> Éditer';
+    deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
 
     editBtn.onclick = () => editRow(entity, index);
     deleteBtn.onclick = () => deleteRow(entity, index);
@@ -197,6 +204,30 @@ function filterData(entity, query) {
 
   data[entity] = filtered;
   updateTable(entity);
+}
+
+// Add this function to handle new entry creation
+function createRow(entity) {
+    const newEntry = {};
+    
+    // Get field names for the current entity
+    const fields = entities[entity];
+    
+    // Ask for each field value
+    fields.forEach(field => {
+        let value = prompt(`Entrez ${field}:`);
+        if (field === "ID") {
+            value = faker.random.uuid(); // Generate UUID for ID field
+        }
+        newEntry[field] = value || ''; // Use empty string if no value provided
+    });
+    
+    // Add the new entry only if at least one field has a value
+    if (Object.values(newEntry).some(value => value !== '')) {
+        data[entity].push(newEntry);
+        saveData(entity);
+        updateTable(entity);
+    }
 }
 
 // Initialisation

@@ -5,29 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <link rel="stylesheet" href="adminpage.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
   <div class="layout">
-    <!-- Barre de navigation verticale -->
     <aside class="sidebar">
-      <h2>Admin Panel</h2>
+      <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
       <nav class="nav">
-        <a href="#" class="nav-item" data-entity="clients">Clients</a>
-        <a href="#" class="nav-item" data-entity="commandes">Commandes</a>
-        <a href="#" class="nav-item" data-entity="produits">Produits</a>
-        <a href="#" class="nav-item" data-entity="factures">Factures</a>
-        <a href="#" class="nav-item" data-entity="utilisateurs">Utilisateurs</a>
-
+        <a href="#" class="nav-item" data-entity="clients">
+          <i class="fas fa-users"></i> Clients
+        </a>
+        <a href="#" class="nav-item" data-entity="commandes">
+          <i class="fas fa-shopping-cart"></i> Commandes
+        </a>
+        <a href="#" class="nav-item" data-entity="produits">
+          <i class="fas fa-box"></i> Produits
+        </a>
+        <a href="#" class="nav-item" data-entity="factures">
+          <i class="fas fa-file-invoice-dollar"></i> Factures
+        </a>
+        <a href="#" class="nav-item" data-entity="utilisateurs">
+          <i class="fas fa-user-cog"></i> Utilisateurs
+        </a>
       </nav>
     </aside>
 
-    <!-- Contenu principal -->
     <main class="content">
       <header>
         <h1 id="entity-title">Clients</h1>
-        <input type="text" id="search-bar" placeholder="Rechercher...">
-        <button id="add-entry-btn">Ajouter une nouvelle entrée</button>
-        <!-- <button id="reset-data-btn">Réinitialiser les données</button> -->
+        <div class="header-controls">
+          <div class="search-wrapper">
+            <input type="text" id="search-bar" placeholder="Rechercher...">
+          </div>
+          <button id="add-entry-btn">
+            <i class="fas fa-plus"></i> Ajouter une nouvelle entrée
+          </button>
+        </div>
       </header>
       <div class="table-container">
         <table id="entity-table">
@@ -38,8 +51,6 @@
         </table>
       </div>
     </main>
-  
-      
    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js"></script>
     <script src="adminpage.js"></script>
