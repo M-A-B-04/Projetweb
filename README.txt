@@ -60,3 +60,4 @@ Projetweb/
         --Mehdi Amine Bazguioui
         --Email : Mehdiamine.bazguioui@emsi-edu.ma
         --Github : M-A-B-04
+u: admin / p : admin (for the login page)
